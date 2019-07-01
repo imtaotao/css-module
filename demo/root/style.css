@@ -1,0 +1,29 @@
+.list-container {
+  width: 600px;
+  height: 600px;
+  border-radius: 5px;
+  overflow-x:hidden;
+  background: -webkit-gradient(linear,left top, right bottom, from(#485563), to(#29323c));
+  color: #fff;
+  box-shadow: 0 0 30px rgba(0,0,0,.5);
+  font-size: 16px;
+  position: fixed;
+  top: calc(50% - 300px);
+  left: calc(50% - 300px);;
+}
+
+.add-user {
+  display: block;
+  width: 100px;
+  margin: 10px 20px 5px 20px;
+  text-align: center;
+  height: 35px;
+  line-height: 35px;
+  border-radius: 5px;
+  background: rgba(255,255,255,.1);
+  cursor: pointer;
+  color: #fff;
+}
+.add-user:hover {
+  background: rgba(255,255,255,.2);
+}

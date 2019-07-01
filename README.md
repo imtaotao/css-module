@@ -1,0 +1,1 @@
+a simple css module plugin.
