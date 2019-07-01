@@ -21,5 +21,5 @@ exports.deepClone = function (data) {
 }
 
 exports.changeUserInfor = function (data) {
-  localStorage.setItem('User', JSON.stringify(deepClone(data)))
+  localStorage.setItem('User', JSON.stringify(exports.deepClone(data)))
 }
