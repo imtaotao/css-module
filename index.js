@@ -318,10 +318,11 @@ window.CssModule = (function () {
     return preIsGlobalToken && token[0] === 'brackets'
   }
 
-  function genModuleStyleName (token, preToken) {
+  function genModuleStyleName (token, preToken, preFilterToken) {
     const styles = {}
     const isGlobal = isGlobalToken(token, preToken)
 
+    // replace class name
     token[1] = token[1].replace(CLASS_REG, (k1, k2) => {
       const hash = '_' + genHash(k2)
       if (styles[k2] === undefined) {
@@ -331,6 +332,15 @@ window.CssModule = (function () {
       }
       return isGlobal ? k1 : k1 + hash
     })
+
+    // replace keyframe
+    if (
+        token[0] === 'word' &&
+        token[1] !== 'global' &&
+        preFilterToken[0] === 'at-word' &&
+        preFilterToken[1] === '@keyframes'
+    ) { token[1] += '_' + genHash(token[1]) }
+
     return [token, styles]
   }
 
@@ -366,6 +376,7 @@ window.CssModule = (function () {
 
   function transferCssText (cssText) {
     let rule = false
+    let preFilterToken = []
     const result = []
     const styles = {}
     const tokens = tokenizer(cssText)
@@ -377,8 +388,9 @@ window.CssModule = (function () {
       if (type === '{' && !rule) rule = true
       if (type === '}' && rule) rule = false
       if ((type === 'word' || type === 'brackets' || type === 'at-word') && !rule) {
-        const [newToken, style] = genModuleStyleName(token, result[result.length - 1])
+        const [newToken, style] = genModuleStyleName(token, result[result.length - 1], preFilterToken)
 
+        preFilterToken = token
         result.push(newToken)
         Object.assign(styles, style)
       } else {

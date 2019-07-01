@@ -37,3 +37,7 @@ input[type=text], input[type=file] {
   color: #ffbf74;
   border-bottom: 1px solid rgba(0,0,0,.15);
 }
+
+@keyframes aaa {
+  
+}
