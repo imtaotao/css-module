@@ -318,13 +318,13 @@ window.CssModule = (function () {
     return preIsGlobalToken && token[0] === 'brackets'
   }
 
-  function genModuleStyleName (token, preToken, preFilterToken) {
+  function genModuleStyleName (token, preToken, preFilterToken, path) {
     const styles = {}
     const isGlobal = isGlobalToken(token, preToken)
 
     // replace class name
     token[1] = token[1].replace(CLASS_REG, (k1, k2) => {
-      const hash = '_' + genHash(k2)
+      const hash = '_' + genHash(path + k2)
       if (styles[k2] === undefined) {
         styles[k2] = isGlobal
           ? k2
@@ -374,7 +374,7 @@ window.CssModule = (function () {
     return text
   }
 
-  function transferCssText (cssText) {
+  function transferCssText (cssText, path) {
     let rule = false
     let preFilterToken = []
     const result = []
@@ -388,7 +388,7 @@ window.CssModule = (function () {
       if (type === '{' && !rule) rule = true
       if (type === '}' && rule) rule = false
       if ((type === 'word' || type === 'brackets' || type === 'at-word') && !rule) {
-        const [newToken, style] = genModuleStyleName(token, result[result.length - 1], preFilterToken)
+        const [newToken, style] = genModuleStyleName(token, result[result.length - 1], preFilterToken, path)
 
         preFilterToken = token
         result.push(newToken)
@@ -401,8 +401,8 @@ window.CssModule = (function () {
     return [splicingCssText(result), styles]
   }
 
-  function cssModule (cssText) {
-    const [newCssText, styles] = transferCssText(cssText)
+  function cssModule (cssText, path) {
+    const [newCssText, styles] = transferCssText(cssText, path)
 
     // Append to dom tree
     const styleNode = document.createElement('style')
@@ -412,5 +412,5 @@ window.CssModule = (function () {
     return styles
   }
 
-  return res => cssModule(res.resource)
+  return res => cssModule(res.resource, res.path)
 })()
