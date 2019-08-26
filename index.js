@@ -375,38 +375,40 @@ window.CssModule = (function () {
   }
 
   function transferCssText (cssText, path) {
-    let scope = 0
-    let rule = false
-    let isMedia = false
+    let scope = []
     let preFilterToken = []
     const result = []
     const styles = {}
     const tokens = tokenizer(cssText)
 
     while (!tokens.endOfFile()) {
-      
       const token = tokens.nextToken()
       const type = token[0]
-
-      // 如果是 media 需要允许编译
+      
       if (type === 'at-word' && token[1] === '@media') {
-        isMedia = true
+        scope.push('media')
       }
 
-      if (type === '{' && !rule) {
-        scope++
-        rule = true
-      }
-
-      if (type === '}' && rule) {
-        scope--
-        rule = false
-        if (isMedia && scope === 0) {
-          isMedia = false
+      if (type === '{') {
+        if (scope[scope.length - 1] === 'media') {
+          scope.pop()
+          scope.push('mediaRule')
+        } else {
+          scope.push('normalRule')
         }
       }
 
-      if ((type === 'word' || type === 'brackets' || type === 'at-word') && (!rule || isMedia)) {
+      if (type === '}') {
+        scope.pop()
+      }
+
+      const isAllow = () => {
+        const typeIsNormal = type === 'word' || type === 'brackets' || type === 'at-word'
+        // 如果是 media 需要允许编译
+        return typeIsNormal && (scope.length === 0 || scope[scope.length - 1] === 'mediaRule')
+      }
+
+      if (isAllow()) {
         const [newToken, style] = genModuleStyleName(token, result[result.length - 1], preFilterToken, path)
         preFilterToken = token
         result.push(newToken)
