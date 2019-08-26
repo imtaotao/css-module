@@ -375,21 +375,39 @@ window.CssModule = (function () {
   }
 
   function transferCssText (cssText, path) {
+    let scope = 0
     let rule = false
+    let isMedia = false
     let preFilterToken = []
     const result = []
     const styles = {}
     const tokens = tokenizer(cssText)
 
     while (!tokens.endOfFile()) {
+      
       const token = tokens.nextToken()
       const type = token[0]
 
-      if (type === '{' && !rule) rule = true
-      if (type === '}' && rule) rule = false
-      if ((type === 'word' || type === 'brackets' || type === 'at-word') && !rule) {
-        const [newToken, style] = genModuleStyleName(token, result[result.length - 1], preFilterToken, path)
+      // 如果是 media 需要允许编译
+      if (type === 'at-word' && token[1] === '@media') {
+        isMedia = true
+      }
 
+      if (type === '{' && !rule) {
+        scope++
+        rule = true
+      }
+
+      if (type === '}' && rule) {
+        scope--
+        rule = false
+        if (isMedia && scope === 0) {
+          isMedia = false
+        }
+      }
+
+      if ((type === 'word' || type === 'brackets' || type === 'at-word') && (!rule || isMedia)) {
+        const [newToken, style] = genModuleStyleName(token, result[result.length - 1], preFilterToken, path)
         preFilterToken = token
         result.push(newToken)
         Object.assign(styles, style)
